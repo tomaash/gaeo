@@ -1,7 +1,7 @@
 google-app-engine-oil (gaeo) - A MVC web framework on Google AppEngine.
 
 Authors: Lin-Chieh Shangkuan (Eric) <ericsk+gaeo@gmail.com>,
-         Liang-Heng Chen (Gary) <xeonchen@gmail.com>
+         Liang-Heng Chen (Gary) <xeonchen+gaeo@gmail.com>
 
 
 == About
@@ -42,12 +42,26 @@ gaeo is under Apache License 2.0. http://www.apache.org/licenses/LICENSE-2.0
         from app import ...
 
    and don't forget to set *template_dir* of gaeo.Config in order to make 
-   the gaeo's dispatcher know how to dispatch the requests.
+   the gaeo's dispatcher know how to dispatch the requests. You can take
+   the following sample code as the reference:
 
+        import os
+        import gaeo
+
+        ...
+        config = gaeo.Config()
+        config.template_dir = os.path.join(
+            os.path.dirname(__file__), 'application', 'templates')
+
+4. For more tutorial, please view our QuickStart guide:
+   http://code.google.com/p/google-app-engine-oil/wiki/QuickStart
 
 
 == More Information
 
-Visit http://code.google.com/p/google-app-engine-oil/
+Project home
+http://code.google.com/p/google-app-engine-oil/
 
+Discussion Group
+http://groups.google.com/group/google-app-engine-oil
 
