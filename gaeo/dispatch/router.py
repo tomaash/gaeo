@@ -39,9 +39,8 @@ class Router:
             p = pattern
             mat = re.findall(':([^/]+)', p)
             for i in range(len(mat)):
-                p = p.replace(mat[i], '([^/]+)')
+                p = p.replace(':' + mat[i], '([^/]+)')
                 tbl[mat[i]] = i
-            p = p.replace(':', '')
 
             if p[0] != '^': p = '^' + p
             if p[-1] != '$': p += '$'
@@ -67,10 +66,11 @@ class Router:
                 mat = re.findall(rule['pattern'], url)
                 if mat:
                     logging.error(rule)
-                    if type(mat[0]).__name__ == 'tuple':
+                    logging.error(mat)
+                    if isinstance(mat[0], tuple):
                         for i in range(len(mat[0])):
                             rule['m'][rule['mlist'][i]] = mat[0][i]
-                    elif type(mat[0]).__name__ == 'str' and len(rule['mlist']) > 0:
+                    elif isinstance(mat[0], basestring) and rule['mlist']:
                         rule['m'][rule['mlist'][0]] = mat[0]
                         
                     return rule['m']
