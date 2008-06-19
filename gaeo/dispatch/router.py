@@ -28,24 +28,27 @@ class Router:
                 'controller': 'welcome',
                 'action': 'index',
             }
-            self.__routing_table = []            
+            self.__pattern_table = []
+            self.__routing_table = []
             
         def connect(self, pattern, tbl = {}):
             """ Add routing pattern """
-            p = pattern
-            mat = re.findall(':([^/]+)', p)
-            for i in range(len(mat)):
-                p = p.replace(':' + mat[i], '([^/]+)')
-                tbl[mat[i]] = i
-
-            if p[0] != '^': p = '^' + p
-            if p[-1] != '$': p += '$'
-
-            self.__routing_table.append({
-                'pattern': p,
-                'mlist': mat, 
-                'm': copy(tbl),
-            })
+            if not pattern in self.__pattern_table:
+                p = pattern
+                mat = re.findall(':([^/]+)', p)
+                for i in range(len(mat)):
+                    p = p.replace(':' + mat[i], '([^/]+)')
+                    tbl[mat[i]] = i
+    
+                if p[0] != '^': p = '^' + p
+                if p[-1] != '$': p += '$'
+    
+                self.__routing_table.append({
+                    'pattern': p,
+                    'mlist': mat, 
+                    'm': copy(tbl),
+                })
+                self.__pattern_table.append(pattern)
         
         def root(self, map = {}):
             """ Set the root (/) routing... """
@@ -61,19 +64,19 @@ class Router:
             if url == '/':
                 return self.__routing_root
 
+            logging.error(self.__routing_table)
             
             for rule in self.__routing_table:
                 mat = re.findall(rule['pattern'], url)
+                mapping = copy(rule['m'])
                 if mat:
-                    logging.error(rule)
-                    logging.error(mat)
                     if isinstance(mat[0], tuple):
                         for i in range(len(mat[0])):
-                            rule['m'][rule['mlist'][i]] = mat[0][i]
+                            mapping[rule['mlist'][i]] = mat[0][i]
                     elif isinstance(mat[0], basestring) and rule['mlist']:
-                        rule['m'][rule['mlist'][0]] = mat[0]
+                        mapping[rule['mlist'][0]] = mat[0]
                         
-                    return rule['m']
+                    return mapping
                 
             return None
     
