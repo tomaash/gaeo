@@ -30,6 +30,18 @@ class Router:
             }
             self.__pattern_table = {}
             self.__routing_table = []
+            # used to store default pattern (but match last)
+            self.__routing_table_fallback = [{
+                # /:controller/:action
+                'pattern': '^/([^/]+)/([^/]+)$',
+                'mlist': ['controller', 'action'],
+                'm': {'controller': 0, 'action': 1}
+            }, {
+                # /:controller
+                'pattern': '^/([^/]+)$',
+                'mlist': ['controller'],
+                'm': {'controller': 0, 'action': 'index'}
+            }]
 
         def connect(self, pattern, tbl={}):
             """ Add routing pattern """
@@ -50,31 +62,43 @@ class Router:
                     'm': copy(tbl),
                 })
 
-                self.__pattern_table[pattern] = len(self.__routing_table) - 1
+                self.__pattern_table[pattern] = \
+                    len(self.__routing_table) - 1
 
         def disconnect(self, pattern):
             if pattern in self.__pattern_table:
                 idx = self.__pattern_table[pattern]
                 del self.__routing_table[idx]
                 del self.__pattern_table[pattern]
+                
+                for k, v in self.__pattern_table.items():
+                    if v > idx:
+                        self.__pattern_table[k] -= 1
 
         def root(self, map = {}):
             """ Set the root (/) routing... """
-            self.__routing_root['controller'] = map.get('controller', self.__routing_root['controller'])
-            self.__routing_root['action'] = map.get('action', self.__routing_root['action'])
+            self.__routing_root['controller'] = \
+                map.get('controller', self.__routing_root['controller'])
+            self.__routing_root['action'] = \
+                map.get('action', self.__routing_root['action'])
 
         def resolve(self, url):
-            # add default routing
-            self.connect('/:controller/:action')
-            self.connect('/:controller', {'action': 'index'})
-
             """ Resolve the url to the correct mapping """
+            
             if url == '/':
                 return self.__routing_root
+            
+            ret = self.__resolveByTable(url, 
+                                        self.__routing_table)
+            if ret is None: # fallback
+                ret = self.__resolveByTable(url, 
+                                            self.__routing_table_fallback)
 
-            logging.error(self.__routing_table)
-
-            for rule in self.__routing_table:
+            return ret
+        
+        def __resolveByTable(self, url, tbl = {}):
+            """ Resolve url by the given table """
+            for rule in tbl:
                 mat = re.findall(rule['pattern'], url)
                 mapping = copy(rule['m'])
                 if mat:
@@ -83,9 +107,8 @@ class Router:
                             mapping[rule['mlist'][i]] = mat[0][i]
                     elif isinstance(mat[0], basestring) and rule['mlist']:
                         mapping[rule['mlist'][0]] = mat[0]
-
                     return mapping
-
+            
             return None
 
     __instance = None

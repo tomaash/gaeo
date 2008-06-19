@@ -28,19 +28,23 @@ def dispatch(hnd):
     r = router.Router()
     route = r.resolve(url)
     if route is None:
-        logging.error('The request url "%s" is invalid. Redirect it to "/"', url)
-        #hnd.redirect('/')
         raise Exception('invalid URL')
     else:
         # create the appropriate controller
         try:
-            ctrl = eval('controller.%sController' % route['controller'].capitalize())(hnd, route)
+            ctrl = eval('controller.%sController' % 
+                        route['controller'].capitalize())(hnd, route)
                        
             # dispatch
-            logging.info('URL "%s" is dispatched to: %sController#%s', url, route['controller'].capitalize(), route['action'])
+            logging.info('URL "%s" is dispatched to: %sController#%s', 
+                         url, 
+                         route['controller'].capitalize(), 
+                         route['action'])
+            
             ctrl.beforeAction()
             getattr(ctrl, route['action'])()
             ctrl.afterAction()
+            
         except AttributeError:  # the controller has not been defined.
             hnd.error(404)                
-            hnd.response.out.write('<html><head><title>404 Not Found</title></head><body><h1>404 Not Found</h1></body</html>')
+            hnd.response.out.write('<h1>404 Not Found</h1>')
