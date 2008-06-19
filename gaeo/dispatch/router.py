@@ -21,51 +21,59 @@ import logging
 
 class Router:
     """ Handles the url routing... """
-    
+
     class __impl:
         def __init__(self):
             self.__routing_root = {
                 'controller': 'welcome',
                 'action': 'index',
             }
-            self.__pattern_table = []
+            self.__pattern_table = {}
             self.__routing_table = []
-            
-        def connect(self, pattern, tbl = {}):
+
+        def connect(self, pattern, tbl={}):
             """ Add routing pattern """
-            if not pattern in self.__pattern_table:
+
+            if pattern not in self.__pattern_table:
                 p = pattern
                 mat = re.findall(':([^/]+)', p)
                 for i in range(len(mat)):
                     p = p.replace(':' + mat[i], '([^/]+)')
                     tbl[mat[i]] = i
-    
+
                 if p[0] != '^': p = '^' + p
                 if p[-1] != '$': p += '$'
-    
+
                 self.__routing_table.append({
                     'pattern': p,
-                    'mlist': mat, 
+                    'mlist': mat,
                     'm': copy(tbl),
                 })
-                self.__pattern_table.append(pattern)
-        
+
+                self.__pattern_table[pattern] = len(self.__routing_table) - 1
+
+        def disconnect(self, pattern):
+            if pattern in self.__pattern_table:
+                idx = self.__pattern_table[pattern]
+                del self.__routing_table[idx]
+                del self.__pattern_table[pattern]
+
         def root(self, map = {}):
             """ Set the root (/) routing... """
             self.__routing_root['controller'] = map.get('controller', self.__routing_root['controller'])
             self.__routing_root['action'] = map.get('action', self.__routing_root['action'])
-        
+
         def resolve(self, url):
             # add default routing
             self.connect('/:controller/:action')
             self.connect('/:controller', {'action': 'index'})
-            
+
             """ Resolve the url to the correct mapping """
             if url == '/':
                 return self.__routing_root
 
             logging.error(self.__routing_table)
-            
+
             for rule in self.__routing_table:
                 mat = re.findall(rule['pattern'], url)
                 mapping = copy(rule['m'])
@@ -75,13 +83,13 @@ class Router:
                             mapping[rule['mlist'][i]] = mat[0][i]
                     elif isinstance(mat[0], basestring) and rule['mlist']:
                         mapping[rule['mlist'][0]] = mat[0]
-                        
+
                     return mapping
-                
+
             return None
-    
+
     __instance = None
-    
+
     def __init__(self):
         if Router.__instance is None:
             Router.__instance = Router.__impl()
