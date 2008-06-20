@@ -17,29 +17,29 @@
 """GAEO controller package
 """
 
+import new
 import os
+import re
 import logging
 
 from google.appengine.ext.webapp import template
 
 import gaeo
 import errors
+import helper
 
 class BaseController:
     """The BaseController is the base class of action controllers.
         Action controller handles the requests from clients.
     """
-    def __init__(self, hnd, params = {}):
-        self.resp = hnd.response
-        self.req = hnd.request
-        self.params = params
+    def __init__(self, hnd, params = {}):        
         rp = hnd.request.params.mixed()
         for k in rp:
             self.params[k] = rp[k] 
         
         self.__controller = params['controller']
         self.__action = params['action']
-        self.__hasRendered = False
+        self._hasRendered = False
         self.__config = gaeo.Config()
         
         self.__tpldir = os.path.join(
@@ -48,26 +48,48 @@ class BaseController:
         )
         self.__template_values = {}
         
+        self.resp = hnd.response
+        self.req = hnd.request
+        self.params = params
+        
+        # create the session
+        try:
+            store = self.__config.session_store
+            exec('from gaeo.session.%s import %sSession' % 
+                (store, store.capitalize()))
+
+            self.session = eval('%sSession' % store.capitalize())(
+                                hnd, '%s_session' % self.__config.app_name)
+        except:
+            raise errors.ControllerInitError('Initialize Session Error!')
+            
+        # add helpers
+        helpers = dir(helper)
+        for h in helpers:
+            if not re.match('^__.*__$', h):
+                self.__dict__[h] = new.instancemethod(eval('helper.%s' % h), self, BaseController)
+        
     def beforeAction(self):
         pass
     
     def afterAction(self):
-        if not self.__hasRendered:
+        if not self._hasRendered:
             self.resp.out.write(template.render(
                 os.path.join(self.__tpldir, self.__action + '.html'),
                 self.__template_values
             ))
             
-    def render(self, opt = {}):
+    def render(self, *text, **opt):
         o = self.resp.out
         h = self.resp.headers
-        
-        if isinstance(opt, basestring):
-            h.set('Content-Type', 'text/plain')
-            o.write(opt)
-        elif isinstance(opt, dict):
+
+        if text:
+            h['Content-Type'] = 'text/plain'
+            for t in text:
+                o.write(str(t))
+        elif opt:
             if opt.get('text'):
-                o.write(opt.get('text'))
+                o.write(str(opt.get('text')))
             elif opt.get('json'):
                 h['Content-Type'] = 'application/json; charset=utf-8'
                 o.write(opt.get('json'))
@@ -85,4 +107,4 @@ class BaseController:
                 ))
             else:
                 raise errors.ControllerRenderTypeError('Render type error')
-        self.__hasRendered = True
+        self._hasRendered = True

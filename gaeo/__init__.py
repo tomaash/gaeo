@@ -31,6 +31,8 @@ class Config:
     class __impl:
         def __init__(self):
             self.template_dir = ''
+            self.session_store = 'memcache'
+            self.app_name = ''
             
     __instance = None
     
@@ -60,4 +62,3 @@ class MainHandler(webapp.RequestHandler):
         """dispatch the request"""
         dispatcher.dispatch(self)
         
-                

@@ -14,17 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+""" helper module """
 
-""" The gaeo controller errors """
-
-class ControllerError(Exception):
-    """ Base error class of controllers' errors """
-    
-class ControllerInitError(ControllerError):
-    pass
-        
-class ControllerRenderError(ControllerError):
-    """ error occured while render """
-    
-class ControllerRenderTypeError(ControllerRenderError):
-    """ Render an invalid type """
+def clear_session(self):
+    if self.session:
+        import logging
+        logging.info('clear session')
+        self.session.invalidate()
