@@ -19,6 +19,77 @@ import re
 from copy import copy
 import logging
 
+class RuleError(Exception):
+    """Base Error"""
+
+class RuleNoControllerError(RuleError):
+    """No controller"""
+
+class Rule(object):
+    def __init__(self, pattern, **param):
+        super(Rule, self).__init__()
+
+        self.pattern = pattern
+        self.regex = pattern
+        self.param = param
+        self.matches = re.findall(':([^/]+)', pattern)
+
+        for i in range(len(self.matches)):
+            self.regex = self.regex.replace(':' + self.matches[i], '([^/]+)')
+            self.param[self.matches[i]] = i
+        self.validate()
+
+    def __eq__(self, other):
+        return self.regex == other.regex
+
+    def __getattr__(self, attr):
+        try:
+            return getattr(self, 'param')[attr]
+        except KeyError:
+            raise AttributeError, attr
+
+    def __str__(self):
+        from operator import itemgetter
+        return ', '.join(['%s: %s' % (k, v) for k, v in \
+            sorted(self.param.items(), key = itemgetter(1))])
+
+    def match_url(self, url):
+        try:
+            mat = re.findall(self.regex, url)[0]
+        except IndexError:
+            return None
+
+        if isinstance(mat, basestring):
+            if self.matches:
+                self.param[self.matches[0]] = mat
+        elif isinstance(mat, tuple):
+            for i in range(len(mat)):
+                self.param[self.matches[i]] = mat[i]
+
+        return self.param
+
+    def url_for(self, controller, **param):
+        param['controller'] = controller
+        url = self.pattern
+        for match in self.matches:
+            if match not in param:
+                return None
+            url = url.replace(':' + match, str(param[match]))
+        return url
+
+    def validate(self):
+        if 'controller' not in self.param:
+            raise RuleNoControllerError
+
+        if 'action' not in self.param:
+            self.param['action'] = 'Index'
+
+        if not self.regex.startswith('^'):
+            self.regex = '^' + self.regex
+        if not self.regex.endswith('$'):
+            self.regex = self.regex + '$'
+        
+
 class Router:
     """ Handles the url routing... """
 
@@ -28,54 +99,26 @@ class Router:
                 'controller': 'welcome',
                 'action': 'index',
             }
-            self.__pattern_table = {}
             self.__routing_table = []
             # used to store default pattern (but match last)
-            self.__routing_table_fallback = [{
-                # /:controller/:action
-                'pattern': '^/([^/]+)/([^/]+)$',
-                'mlist': ['controller', 'action'],
-                'm': {'controller': 0, 'action': 1}
-            }, {
-                # /:controller
-                'pattern': '^/([^/]+)$|^/([^/]+)/$',
-                'mlist': ['controller'],
-                'm': {'controller': 0, 'action': 'index'}
-            }]
+            self.__routing_table_fallback = [
+                Rule('/:controller/:action'),
+                Rule('/:controller')
+            ]
 
-        def connect(self, pattern, tbl={}):
+        def connect(self, pattern, **tbl):
             """ Add routing pattern """
 
-            if pattern not in self.__pattern_table:
-                p = pattern
-                mat = re.findall(':([^/]+)', p)
-                for i in range(len(mat)):
-                    p = p.replace(':' + mat[i], '([^/]+)')
-                    tbl[mat[i]] = i
-
-                if p[0] != '^': p = '^' + p
-                if p[-1] != '$': p += '$'
-
-                self.__routing_table.append({
-                    'pattern': p,
-                    'mlist': mat,
-                    'm': copy(tbl),
-                })
-
-                self.__pattern_table[pattern] = \
-                    len(self.__routing_table) - 1
+            rule = Rule(pattern, **tbl)
+            if rule not in self.__routing_table:
+                self.__routing_table.append(rule)
 
         def disconnect(self, pattern):
-            if pattern in self.__pattern_table:
-                idx = self.__pattern_table[pattern]
-                del self.__routing_table[idx]
-                del self.__pattern_table[pattern]
-                
-                for k, v in self.__pattern_table.items():
-                    if v > idx:
-                        self.__pattern_table[k] -= 1
+            rule = Rule(pattern)
+            if rule in self.__routing_table:
+                self.__routing_table.remove(rule)
 
-        def root(self, map = {}):
+        def root(self, **map):
             """ Set the root (/) routing... """
             self.__routing_root['controller'] = \
                 map.get('controller', self.__routing_root['controller'])
@@ -93,25 +136,21 @@ class Router:
             if ret is None: # fallback
                 ret = self.__resolveByTable(url, 
                                             self.__routing_table_fallback)
-
             return ret
         
-        def __resolveByTable(self, url, tbl = {}):
+        def __resolveByTable(self, url, rules):
             """ Resolve url by the given table """
-            for rule in tbl:
-                mat = re.findall(rule['pattern'], url)
-                mapping = copy(rule['m'])
-                if mat:
-                    if isinstance(mat[0], tuple):
-                        j = 0
-                        for i in range(len(mat[0])):
-                            if len(mat[0][i]) > 0:
-                                mapping[rule['mlist'][j]] = mat[0][i]
-                                j += 1
-                    elif isinstance(mat[0], basestring) and rule['mlist']:
-                        mapping[rule['mlist'][0]] = mat[0]
-                    return mapping
-            
+            for r in rules:
+                ret = r.match_url(url)
+                if ret:
+                    return ret
+            return None
+
+        def url_for(self, controller, **param):
+            for r in self.__routing_table:
+                ret = r.url_for(controller, **param)
+                if ret:
+                    return ret
             return None
 
     __instance = None
