@@ -75,10 +75,7 @@ class BaseController:
     
     def afterAction(self):
         if not self._hasRendered:
-            self.resp.out.write(template.render(
-                os.path.join(self.__tpldir, self.__action + '.html'),
-                self._template_values
-            ))
+            self.render(template=self.__action, values=self.__dict__)
             
     def render(self, *text, **opt):
         o = self.resp.out
