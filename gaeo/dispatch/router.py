@@ -38,7 +38,7 @@ class Router:
                 'm': {'controller': 0, 'action': 1}
             }, {
                 # /:controller
-                'pattern': '^/([^/]+)$',
+                'pattern': '^/([^/]+)$|^/([^/]+)/$',
                 'mlist': ['controller'],
                 'm': {'controller': 0, 'action': 'index'}
             }]
@@ -103,8 +103,11 @@ class Router:
                 mapping = copy(rule['m'])
                 if mat:
                     if isinstance(mat[0], tuple):
+                        j = 0
                         for i in range(len(mat[0])):
-                            mapping[rule['mlist'][i]] = mat[0][i]
+                            if len(mat[0][i]) > 0:
+                                mapping[rule['mlist'][j]] = mat[0][i]
+                                j += 1
                     elif isinstance(mat[0], basestring) and rule['mlist']:
                         mapping[rule['mlist'][0]] = mat[0]
                     return mapping
