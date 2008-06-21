@@ -82,13 +82,13 @@ class Rule(object):
             raise RuleNoControllerError
 
         if 'action' not in self.param:
-            self.param['action'] = 'Index'
+            self.param['action'] = 'index'
 
         if not self.regex.startswith('^'):
             self.regex = '^' + self.regex
         if not self.regex.endswith('$'):
             self.regex = self.regex + '$'
-        
+
 
 class Router:
     """ Handles the url routing... """
@@ -127,17 +127,15 @@ class Router:
 
         def resolve(self, url):
             """ Resolve the url to the correct mapping """
-            
+
             if url == '/':
                 return self.__routing_root
-            
-            ret = self.__resolveByTable(url, 
-                                        self.__routing_table)
+
+            ret = self.__resolveByTable(url, self.__routing_table)
             if ret is None: # fallback
-                ret = self.__resolveByTable(url, 
-                                            self.__routing_table_fallback)
+                ret = self.__resolveByTable(url, self.__routing_table_fallback)
             return ret
-        
+
         def __resolveByTable(self, url, rules):
             """ Resolve url by the given table """
             for r in rules:
@@ -165,3 +163,4 @@ class Router:
 
     def __setattr__(self, attr, value):
         return setattr(self.__instance, attr, value)
+
