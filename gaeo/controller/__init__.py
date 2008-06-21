@@ -32,7 +32,12 @@ class BaseController:
     """The BaseController is the base class of action controllers.
         Action controller handles the requests from clients.
     """
-    def __init__(self, hnd, params = {}):        
+    def __init__(self, hnd, params = {}):
+        self.hnd = hnd
+        self.resp = hnd.response
+        self.req = hnd.request
+        self.params = params
+        
         rp = hnd.request.params.mixed()
         for k in rp:
             self.params[k] = rp[k] 
@@ -46,11 +51,7 @@ class BaseController:
             self.__config.template_dir, 
             self.__controller
         )
-        self.__template_values = {}
-        
-        self.resp = hnd.response
-        self.req = hnd.request
-        self.params = params
+        self._template_values = {}
         
         # create the session
         try:
@@ -76,7 +77,7 @@ class BaseController:
         if not self._hasRendered:
             self.resp.out.write(template.render(
                 os.path.join(self.__tpldir, self.__action + '.html'),
-                self.__template_values
+                self._template_values
             ))
             
     def render(self, *text, **opt):
