@@ -75,6 +75,12 @@ class Rule(object):
             if match not in param:
                 return None
             url = url.replace(':' + match, str(param[match]))
+            del param[match]
+
+        # extra parameters
+        if param:
+            url += '?' + '&'.join(['%s=%s' % (k, v) for k, v in param.items()])
+
         return url
 
     def validate(self):
