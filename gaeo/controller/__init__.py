@@ -107,5 +107,6 @@ class BaseController:
         self.hasRendered = True
 
     def redirect(self, url, perm = True):
+        self.hasRendered = True # dirty hack, make gaeo don't find the template
         self.hnd.redirect(url, perm)
         
