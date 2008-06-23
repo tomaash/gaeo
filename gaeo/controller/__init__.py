@@ -34,8 +34,8 @@ class BaseController:
     """
     def __init__(self, hnd, params = {}):
         self.hnd = hnd
-        self.resp = hnd.response
-        self.req = hnd.request
+        self.resp = self.response = hnd.response
+        self.req = self.request = hnd.request
         self.params = params
         
         rp = hnd.request.params.mixed()
@@ -44,7 +44,7 @@ class BaseController:
         
         self.__controller = params['controller']
         self.__action = params['action']
-        self._hasRendered = False
+        self.hasRendered = False
         self.__config = gaeo.Config()
         
         self.__tpldir = os.path.join(
@@ -74,8 +74,7 @@ class BaseController:
         pass
     
     def afterAction(self):
-        if not self._hasRendered:
-            self.render(template=self.__action, values=self.__dict__)
+        pass
             
     def render(self, *text, **opt):
         o = self.resp.out
@@ -105,4 +104,8 @@ class BaseController:
                 ))
             else:
                 raise errors.ControllerRenderTypeError('Render type error')
-        self._hasRendered = True
+        self.hasRendered = True
+
+    def redirect(self, url, perm = True):
+        self.hnd.redirect(url, perm)
+        

@@ -45,6 +45,9 @@ def dispatch(hnd):
             getattr(ctrl, route['action'])()
             ctrl.afterAction()
             
+            if not ctrl.hasRendered:
+                ctrl.render(template=route['action'], values=ctrl.__dict__)
+            
         except AttributeError:  # the controller has not been defined.
             hnd.error(404)                
             hnd.response.out.write('<h1>404 Not Found</h1>')
