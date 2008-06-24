@@ -1,8 +1,10 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 from __future__ import with_statement
 
 import os
 import sys
+
+from shutil import copytree
 
 def usage(app_name):
     return 'Usage: %s <project name>' % (app_name)
@@ -86,6 +88,9 @@ def main(project_name):
 
     # create main.py
     create_main_py(os.path.join(project_home, 'main.py'))
+
+    # copy GAEO directory
+    copytree(os.path.join(os.path.dirname(__file__), '..', 'gaeo'), os.path.join(project_home, 'gaeo'))
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
