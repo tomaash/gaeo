@@ -73,11 +73,13 @@ def main(project_name):
     else:
         os.mkdir(project_home, 0755)
 
+    project_name = os.path.basename(project_name).lower()
+
     # create <project_name>/application/__init__.py
     application_dir = os.path.join(project_home, 'application')
     os.mkdir(application_dir, 0755)
-    create_file(os.path.join(application_dir, '__init__.py'), []) 
-    create_file(os.path.join(application_dir, 'controller.py'), []) 
+    create_file(os.path.join(application_dir, '__init__.py'), [])
+    create_file(os.path.join(application_dir, 'controller.py'), [])
 
     # create app.yaml
     create_app_yaml(os.path.join(project_home, 'app.yaml'), project_name)
