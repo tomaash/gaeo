@@ -18,8 +18,6 @@
 import re
 import logging
 
-from application import controller
-
 import router
 
 def dispatch(hnd):
@@ -32,8 +30,11 @@ def dispatch(hnd):
     else:
         # create the appropriate controller
         try:
-            ctrl = eval('controller.%sController' % 
-                        route['controller'].capitalize())(hnd, route)
+            exec('from controller import %s' % route['controller'])
+            ctrl = eval('%s.%sController' % (
+                        route['controller'], 
+                        route['controller'].capitalize()
+                    ))(hnd, route)
                        
             # dispatch
             logging.info('URL "%s" is dispatched to: %sController#%s', 
