@@ -48,7 +48,10 @@ def dispatch(hnd):
             
             if not ctrl.hasRendered:
                 ctrl.render(template=route['action'], values=ctrl.__dict__)
-            
+        except ImportError:
+            hnd.error(404)
+            # FIXME: What msg is suitable for response ?
+            hnd.response.out.write('<h1>404 Not Found</h1>')
         except AttributeError:  # the controller has not been defined.
             hnd.error(404)                
             hnd.response.out.write('<h1>404 Not Found</h1>')

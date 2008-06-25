@@ -21,6 +21,15 @@ def create_app_yaml(app_yaml_file, project_name):
         'runtime: python',
         '',
         'handlers:',
+        '- url: /css',
+        '  static_dir: assets/css',
+        '- url: /js',
+        '  static_dir: assets/js',
+        '- url: /img',
+        '  static_dir: assets/img',
+        '- url: /favicon.ico',
+        '  static_files: favicon.ico',
+        '  upload: favicon.ico',
         '- url: .*',
         '  script: main.py',
         '',
@@ -47,6 +56,7 @@ def create_main_py(main_py_file):
         "def main():",
         "    # add the project's directory to the import path list.",
         "    sys.path.append(os.path.dirname(__file__))",
+        "    sys.path.append(os.path.join(os.path.dirname(__file__), 'application'))",
         "",
         "    # get the gaeo's config (singleton)",
         "    config = gaeo.Config()",
@@ -113,8 +123,12 @@ def main(project_name):
     os.mkdir(application_dir, 0755)
     create_file(os.path.join(application_dir, '__init__.py'), [])
 
-    # create default controller
-    create_controller_py(os.path.join(application_dir, 'controller.py'))
+    # create <project_name>/application/controller/welcome.py
+    controller_dir = os.path.join(application_dir, 'controller')
+    os.mkdir(controller_dir, 0755)
+    create_file(os.path.join(controller_dir, '__init__.py'), [])
+    # create default controller (welcome.py)
+    create_controller_py(os.path.join(controller_dir, 'welcome.py'))
 
     # create default template
     create_default_template(os.path.join(application_dir, 'templates', 'welcome', 'index.html'))
@@ -124,6 +138,16 @@ def main(project_name):
 
     # create main.py
     create_main_py(os.path.join(project_home, 'main.py'))
+
+    # create assets directories
+    assets_dir = os.path.join(project_home, 'assets')
+    os.mkdir(assets_dir, 0755)
+    for d in ['css', 'img', 'js']:
+        target_dir = os.path.join(assets_dir, d)
+        os.mkdir(target_dir, 0755)
+
+    # create an empty favicon.ico
+    create_file(os.path.join(project_home, 'favicon.ico'), [])
 
     # copy GAEO directory
     copytree(os.path.join(os.path.dirname(__file__), '..', 'gaeo'), os.path.join(project_home, 'gaeo'))
