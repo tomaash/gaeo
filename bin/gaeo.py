@@ -23,6 +23,7 @@ def create_app_yaml(app_yaml_file, project_name):
         'handlers:',
         '- url: .*',
         '  script: main.py',
+        '',
     ])
 
 def create_main_py(main_py_file):
@@ -62,6 +63,36 @@ def create_main_py(main_py_file):
         "",
         "if __name__ == '__main__':",
         "    main()",
+        "",
+    ])
+
+
+def create_controller_py(controller_py):
+    create_file(controller_py, [
+        'from gaeo.controller import BaseController',
+        '',
+        'class WelcomeController(BaseController):',
+        '    def index(self):',
+        '        pass',
+        '',
+    ])
+
+def create_default_template(index_html_file):
+    os.makedirs(os.path.dirname(index_html_file))
+    create_file(index_html_file, [
+        '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"',
+        '    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+        '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">',
+        '    <head>',
+        '        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />',
+        '        <title>GAEO</title>',
+        '    </head>',
+        '',
+        '    <body>',
+        '      <h1>It works!!</h1>',
+        '    </body>',
+        '</html>',
+        '',
     ])
 
 def main(project_name):
@@ -81,7 +112,12 @@ def main(project_name):
     application_dir = os.path.join(project_home, 'application')
     os.mkdir(application_dir, 0755)
     create_file(os.path.join(application_dir, '__init__.py'), [])
-    create_file(os.path.join(application_dir, 'controller.py'), [])
+
+    # create default controller
+    create_controller_py(os.path.join(application_dir, 'controller.py'))
+
+    # create default template
+    create_default_template(os.path.join(application_dir, 'templates', 'welcome', 'index.html'))
 
     # create app.yaml
     create_app_yaml(os.path.join(project_home, 'app.yaml'), project_name)

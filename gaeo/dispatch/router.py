@@ -26,13 +26,14 @@ class RuleNoControllerError(RuleError):
     """No controller"""
 
 class Rule(object):
+    """ Handles each routing rule. """
     def __init__(self, pattern, **param):
         super(Rule, self).__init__()
 
-        self.pattern = pattern
-        self.regex = pattern
+        self.pattern = pattern[:-1] if pattern.endswith('/') else pattern
+        self.regex = self.pattern
         self.param = param
-        self.matches = re.findall(':([^/]+)', pattern)
+        self.matches = re.findall(':([^/]+)', self.pattern)
 
         for i in range(len(self.matches)):
             self.regex = self.regex.replace(':' + self.matches[i], '([^/]+)')
@@ -54,6 +55,8 @@ class Rule(object):
             sorted(self.param.items(), key = itemgetter(1))])
 
     def match_url(self, url):
+        if url.endswith('/'):
+            url = url[:-1]
         try:
             mat = re.findall(self.regex, url)[0]
         except IndexError:
