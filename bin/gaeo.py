@@ -152,6 +152,8 @@ def main(project_name):
     # copy GAEO directory
     copytree(os.path.join(os.path.dirname(__file__), '..', 'gaeo'), os.path.join(project_home, 'gaeo'))
 
+    print 'The "%s" project has been created.' % project_name
+
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         main(sys.argv[1])
