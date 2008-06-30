@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2008 Lin-Chieh Shangkuan & Liang-Heng Chen
+# Copyright 2008 GAEO Team.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import gaeo
 import errors
 import helper
 
-class BaseController:
+class BaseController(object):
     """The BaseController is the base class of action controllers.
         Action controller handles the requests from clients.
     """
@@ -44,7 +44,7 @@ class BaseController:
         
         self.__controller = params['controller']
         self.__action = params['action']
-        self.hasRendered = False
+        self.has_rendered = False
         self.__config = gaeo.Config()
         
         self.__tpldir = os.path.join(
@@ -70,10 +70,10 @@ class BaseController:
             if not re.match('^__.*__$', h):
                 self.__dict__[h] = new.instancemethod(eval('helper.%s' % h), self, BaseController)
         
-    def beforeAction(self):
+    def before_action(self):
         pass
     
-    def afterAction(self):
+    def after_action(self):
         pass
             
     def render(self, *text, **opt):
@@ -104,9 +104,9 @@ class BaseController:
                 ))
             else:
                 raise errors.ControllerRenderTypeError('Render type error')
-        self.hasRendered = True
+        self.has_rendered = True
 
     def redirect(self, url, perm = True):
-        self.hasRendered = True # dirty hack, make gaeo don't find the template
+        self.has_rendered = True # dirty hack, make gaeo don't find the template
         self.hnd.redirect(url, perm)
         

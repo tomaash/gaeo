@@ -42,11 +42,11 @@ def dispatch(hnd):
                          route['controller'].capitalize(), 
                          route['action'])
             
-            ctrl.beforeAction()
+            ctrl.before_action()
             getattr(ctrl, route['action'])()
-            ctrl.afterAction()
+            ctrl.after_action()
             
-            if not ctrl.hasRendered:
+            if not ctrl.has_rendered:
                 ctrl.render(template=route['action'], values=ctrl.__dict__)
         except ImportError:
             hnd.error(404)

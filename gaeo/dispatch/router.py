@@ -140,12 +140,12 @@ class Router:
             if url == '/':
                 return self.__routing_root
 
-            ret = self.__resolveByTable(url, self.__routing_table)
+            ret = self.__resolve_by_table(url, self.__routing_table)
             if ret is None: # fallback
-                ret = self.__resolveByTable(url, self.__routing_table_fallback)
+                ret = self.__resolve_by_table(url, self.__routing_table_fallback)
             return ret
 
-        def __resolveByTable(self, url, rules):
+        def __resolve_by_table(self, url, rules):
             """ Resolve url by the given table """
             for r in rules:
                 ret = r.match_url(url)

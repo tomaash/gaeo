@@ -53,12 +53,12 @@ class MainHandler(webapp.RequestHandler):
     """Handles all requests
     """
     def get(self):
-        self.__processRequest()
+        self.__process_request()
     
     def post(self):
-        self.__processRequest()
+        self.__process_request()
         
-    def __processRequest(self):
+    def __process_request(self):
         """dispatch the request"""
         dispatcher.dispatch(self)
         
