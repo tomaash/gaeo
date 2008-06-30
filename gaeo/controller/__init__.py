@@ -42,14 +42,14 @@ class BaseController(object):
         for k in rp:
             self.params[k] = rp[k] 
         
-        self.__controller = params['controller']
-        self.__action = params['action']
+        self._controller = params['controller']
+        self._action = params['action']
         self.has_rendered = False
         self.__config = gaeo.Config()
         
         self.__tpldir = os.path.join(
             self.__config.template_dir, 
-            self.__controller
+            self._controller
         )
         self._template_values = {}
         
