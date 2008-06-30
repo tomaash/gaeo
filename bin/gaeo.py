@@ -3,7 +3,7 @@ from __future__ import with_statement
 
 import os
 import sys
-
+from copy import copy
 from shutil import copytree
 
 def usage(app_name):
@@ -105,8 +105,54 @@ def create_default_template(index_html_file):
         '',
     ])
 
-def main(project_name):
+def create_eclipse_project(project_home, project_name):
+    proj = os.path.join(project_home, '.project')
+    pydevproj = os.path.join(project_home, '.pydevproject')
+    
+    create_file(proj, [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<projectDescription>',
+        '    <name>%s</name>' % project_name,
+        '    <comment></comment>',
+        '    <projects>',
+        '    </projects>',
+        '    <buildSpec>',
+        '        <buildCommand>',
+        '            <name>org.python.pydev.PyDevBuilder</name>',
+        '            <arguments>',
+        '            </arguments>',
+        '        </buildCommand>',
+        '    </buildSpec>',
+        '    <natures>',
+        '        <nature>org.python.pydev.pythonNature</nature>',
+        '    </natures>',
+        '</projectDescription>'
+    ])
+    
+    create_file(pydevproj, [
+        '<?xml version="1.0" encoding="UTF-8" standalone="no"?>',
+        '<?eclipse-pydev version="1.0"?>',
+        '',
+        '<pydev_project>',
+        '    <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.5</pydev_property>',
+        '    <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">',
+        '        <path>/%s</path>' % project_name,
+        '    </pydev_pathproperty>',
+        '</pydev_project>'
+    ])
+
+def main(argv):
     cur_dir = os.getcwd()
+
+    args = copy(argv)
+
+    if '-eclipse' in args:
+        create_eclipse_proj = True
+        args.remove('-eclipse')
+    else:
+        create_eclipse_proj = False
+        
+    project_name = args[0]
 
     # create project directory
     project_home = os.path.join(cur_dir, project_name)
@@ -152,10 +198,14 @@ def main(project_name):
     # copy GAEO directory
     copytree(os.path.join(os.path.dirname(__file__), '..', 'gaeo'), os.path.join(project_home, 'gaeo'))
 
+    # create the eclipse project file
+    if create_eclipse_proj:
+        create_eclipse_project(project_home, project_name)
+
     print 'The "%s" project has been created.' % project_name
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        main(sys.argv[1])
+    if len(sys.argv) > 1:
+        main(sys.argv[1:])
     else:
         print usage(sys.argv[0]);
