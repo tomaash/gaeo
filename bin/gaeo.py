@@ -3,13 +3,15 @@ from __future__ import with_statement
 
 import os
 import sys
-from copy import copy
+from getopt import getopt
 from shutil import copytree
 
 def usage(app_name):
     return 'Usage: %s <project name>' % (app_name)
 
 def create_file(file_name, content):
+    if not os.path.exists(os.path.dirname(file_name)):
+        os.makedirs(os.path.dirname(file_name), 0755)
     with open(file_name, 'w') as f:
         f.write('\n'.join(content))
 
@@ -88,7 +90,6 @@ def create_controller_py(controller_py):
     ])
 
 def create_default_template(index_html_file):
-    os.makedirs(os.path.dirname(index_html_file))
     create_file(index_html_file, [
         '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"',
         '    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
@@ -142,16 +143,17 @@ def create_eclipse_project(project_home, project_name):
     ])
 
 def main(argv):
+    ignore_exist_proj = False 
+    create_eclipse_proj = False
+
     cur_dir = os.getcwd()
 
-    args = copy(argv)
+    optlist, args = getopt(argv, '', ['eclipse'])
 
-    if '-eclipse' in args:
-        create_eclipse_proj = True
-        args.remove('-eclipse')
-    else:
-        create_eclipse_proj = False
-        
+    for opt, value in optlist:
+        if opt == '--eclipse':
+            create_eclipse_proj = True
+
     project_name = args[0]
 
     # create project directory
@@ -166,12 +168,10 @@ def main(argv):
 
     # create <project_name>/application/__init__.py
     application_dir = os.path.join(project_home, 'application')
-    os.mkdir(application_dir, 0755)
     create_file(os.path.join(application_dir, '__init__.py'), [])
 
     # create <project_name>/application/controller/welcome.py
     controller_dir = os.path.join(application_dir, 'controller')
-    os.mkdir(controller_dir, 0755)
     create_file(os.path.join(controller_dir, '__init__.py'), [])
     # create default controller (welcome.py)
     create_controller_py(os.path.join(controller_dir, 'welcome.py'))
