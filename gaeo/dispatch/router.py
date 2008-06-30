@@ -81,10 +81,9 @@ class Rule(object):
             del param[match]
 
         # extra parameters
-        if param:
-            url += '?' + '&'.join(['%s=%s' % (k, v) for k, v in param.items()])
+        ep = '&'.join(['%s=%s' % (k, v) for k, v in param.items() if k not in self.param])
 
-        return url
+        return url + '?' + ep if ep else url
 
     def validate(self):
         if 'controller' not in self.param:
