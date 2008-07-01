@@ -51,7 +51,11 @@ def dispatch(hnd):
         except ImportError:
             hnd.error(404)
             # FIXME: What msg is suitable for response ?
+            import sys
+            logging.error(sys.exc_info())
             hnd.response.out.write('<h1>404 Not Found</h1>')
         except AttributeError:  # the controller has not been defined.
-            hnd.error(404)                
+            hnd.error(404)    
+            import sys
+            logging.error(sys.exc_info())
             hnd.response.out.write('<h1>404 Not Found</h1>')
