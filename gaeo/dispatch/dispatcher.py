@@ -32,30 +32,28 @@ def dispatch(hnd):
         try:
             exec('from controller import %s' % route['controller'])
             ctrl = eval('%s.%sController' % (
-                        route['controller'], 
+                        route['controller'],
                         route['controller'].capitalize()
                     ))(hnd, route)
-                       
+
             # dispatch
-            logging.info('URL "%s" is dispatched to: %sController#%s', 
-                         url, 
-                         route['controller'].capitalize(), 
+            logging.info('URL "%s" is dispatched to: %sController#%s',
+                         url,
+                         route['controller'].capitalize(),
                          route['action'])
-            
+
             ctrl.before_action()
             getattr(ctrl, route['action'])()
             ctrl.after_action()
-            
+
             if not ctrl.has_rendered:
                 ctrl.render(template=route['action'], values=ctrl.__dict__)
-        except ImportError:
+        except ImportError, e:
             hnd.error(404)
             # FIXME: What msg is suitable for response ?
-            import sys
-            logging.error(sys.exc_info())
+            logging.error(e)
             hnd.response.out.write('<h1>404 Not Found</h1>')
-        except AttributeError:  # the controller has not been defined.
-            hnd.error(404)    
-            import sys
-            logging.error(sys.exc_info())
+        except AttributeError, e:  # the controller has not been defined.
+            hnd.error(404)
+            logging.error(e)
             hnd.response.out.write('<h1>404 Not Found</h1>')

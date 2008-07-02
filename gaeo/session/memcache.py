@@ -25,7 +25,7 @@ from gaeo import session
 
 class MemcacheSession(session.Session):
     """ session that uses memcache """
-    
+
     def __init__(self, hnd, name = 'gaeo_session', timeout = 60 * 60):
         super(MemcacheSession, self).__init__(hnd, name, timeout)
 
@@ -39,13 +39,13 @@ class MemcacheSession(session.Session):
         else:   # not in the cookie, set it
             cookie = '%s=%s' % (name, self._id)
             hnd.response.headers.add_header('Set-Cookie', cookie)
-                                                        
+
     def put(self):
         if not self._invalidated:
             memcache.set(self._id, pickle.dumps(self.copy()), self._timeout)
-            
+
     def invalidate(self):
-        """Invalidates the session data"""        
+        """Invalidates the session data"""
         self._hnd.response.headers.add_header(
             'Set-Cookie',
             '%s=; expires=Thu, 1-Jan-1970 00:00:00 GMT;' % self._name

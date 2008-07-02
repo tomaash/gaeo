@@ -16,34 +16,34 @@
 #
 """ GAEO Session package """
 import logging
-from random import choice  
+from random import choice
 from string import digits, letters
 
 SESSIONID_LEN = 64
 POOL = digits + letters
 
 class Session(dict):
-    """ Session is an abstract class that declares sessions basic 
+    """ Session is an abstract class that declares sessions basic
     operations. """
-    
+
     def __init__(self, hnd, name, timeout):
         """The Session's constructor.
-        
+
         @param hnd      The webapp.ReqeustHanlder object.
         @param name     The session name.
         @param timeout  The time interval (in sec) that the session expired.
         """
-        
+
         dict.__init__(self)
         self._name = name
         self._hnd = hnd
         self._timeout = timeout
         self._id = ''.join([ choice(POOL) for i in range(SESSIONID_LEN) ])
-        
+
         self._invalidated = False
-    
+
     def save(self):
         pass
-        
+
     def invalidate(self):
-        pass  
+        pass

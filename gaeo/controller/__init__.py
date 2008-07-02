@@ -37,45 +37,45 @@ class BaseController(object):
         self.resp = self.response = hnd.response
         self.req = self.request = hnd.request
         self.params = params
-        
+
         rp = hnd.request.params.mixed()
         for k in rp:
-            self.params[k] = rp[k] 
-        
+            self.params[k] = rp[k]
+
         self._controller = params['controller']
         self._action = params['action']
         self.has_rendered = False
         self.__config = gaeo.Config()
-        
+
         self.__tpldir = os.path.join(
-            self.__config.template_dir, 
+            self.__config.template_dir,
             self._controller
         )
         self._template_values = {}
-        
+
         # create the session
         try:
             store = self.__config.session_store
-            exec('from gaeo.session.%s import %sSession' % 
+            exec('from gaeo.session.%s import %sSession' %
                 (store, store.capitalize()))
 
             self.session = eval('%sSession' % store.capitalize())(
                                 hnd, '%s_session' % self.__config.app_name)
         except:
             raise errors.ControllerInitError('Initialize Session Error!')
-            
+
         # add helpers
         helpers = dir(helper)
         for h in helpers:
             if not re.match('^__.*__$', h):
                 self.__dict__[h] = new.instancemethod(eval('helper.%s' % h), self, BaseController)
-        
+
     def before_action(self):
         pass
-    
+
     def after_action(self):
         pass
-            
+
     def render(self, *text, **opt):
         o = self.resp.out
         h = self.resp.headers
@@ -98,7 +98,7 @@ class BaseController(object):
                 if isinstance(opt.get('values'), dict):
                     context.update(opt.get('values'))
                 o.write(template.render(
-                    os.path.join(self.__tpldir, 
+                    os.path.join(self.__tpldir,
                                  opt.get('template') + '.html'),
                     context
                 ))
@@ -109,4 +109,4 @@ class BaseController(object):
     def redirect(self, url, perm = True):
         self.has_rendered = True # dirty hack, make gaeo don't find the template
         self.hnd.redirect(url, perm)
-        
+
