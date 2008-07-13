@@ -59,7 +59,7 @@ class BaseModel(db.Model):
                 cond_str += ' ORDER BY %s' % order_by
             cls.__dict__[name] = property(lambda self: cls.gql(cond_str))
     
-    def update_attribute(self, **kwds):
+    def update_attributes(self, **kwds):
         """Update the specified properties"""
         need_change = False
         props = self.properties()
