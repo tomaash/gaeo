@@ -41,13 +41,6 @@ def dispatch(hnd):
                          url,
                          route['controller'].capitalize(),
                          route['action'])
-
-            ctrl.before_action()
-            getattr(ctrl, route['action'])()
-            ctrl.after_action()
-
-            if not ctrl.has_rendered:
-                ctrl.render(template=route['action'], values=ctrl.__dict__)
         except ImportError, e:
             hnd.error(404)
             # FIXME: What msg is suitable for response ?
@@ -57,3 +50,10 @@ def dispatch(hnd):
             hnd.error(404)
             logging.error(e)
             hnd.response.out.write('<h1>404 Not Found</h1>')
+        else:
+            ctrl.before_action()
+            getattr(ctrl, route['action'])()
+            ctrl.after_action()
+
+            if not ctrl.has_rendered:
+                ctrl.render(template=route['action'], values=ctrl.__dict__)
