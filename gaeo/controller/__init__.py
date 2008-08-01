@@ -53,6 +53,10 @@ class BaseController(object):
         )
         self._template_values = {}
 
+        # detect the mobile platform
+        self._is_mobile = self.__detect_mobile()
+        self._is_iphone = self.__detect_iphone()
+
         # create the session
         try:
             store = self.__config.session_store
@@ -110,3 +114,36 @@ class BaseController(object):
         self.has_rendered = True # dirty hack, make gaeo don't find the template
         self.hnd.redirect(url, perm)
 
+    def __detect_mobile(self):
+        h = self.request.headers
+
+        # wap.wml
+        ha = h.get('Accept')
+        if ha and (ha.find('text/vnd.wap.wml') > -1 or ha.find('application/vnd.wap.xhtml+xml') > -1):
+            return True
+        
+        wap_profile = h.get('X-Wap-Profile')
+        profile = h.get("Profile")
+        opera_mini = h.get('X-OperaMini-Features')
+        ua_pixels = h.get('UA-pixels')
+        
+        if wap_profile or profile or opera_mini or ua_pixels:
+            return True
+        
+        # FIXME: add common user agents
+        common_uas = ['sony', 'noki', 'java', 'midp', 'benq', 'wap-', 'wapi']
+        
+        ua = h.get('User-Agent')
+        if ua and ua[0:4].lower() in common_uas:
+            return True
+        
+        return False
+        
+    def __detect_iphone(self):
+        """ for detecting iPhone/iPod """
+        ua = self.request.headers.get('User-Agent')
+        if ua:
+            ua = ua.lower();
+            return ua.find('iphone') > -1 or ua.find('ipod') > -1
+        else:
+            return False
