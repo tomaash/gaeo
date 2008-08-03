@@ -53,6 +53,9 @@ class BaseController(object):
         )
         self._template_values = {}
 
+        # implement parameter nesting as in rails
+        self.params=self.__nested_params(self.params)
+        
         # detect the mobile platform
         self._is_mobile = self.__detect_mobile()
         self._is_iphone = self.__detect_iphone()
@@ -110,7 +113,7 @@ class BaseController(object):
                 raise errors.ControllerRenderTypeError('Render type error')
         self.has_rendered = True
 
-    def redirect(self, url, perm = True):
+    def redirect(self, url, perm = False):
         self.has_rendered = True # dirty hack, make gaeo don't find the template
         self.hnd.redirect(url, perm)
 
@@ -147,3 +150,24 @@ class BaseController(object):
             return ua.find('iphone') > -1 or ua.find('ipod') > -1
         else:
             return False
+            
+
+    # Helper methods for parameter nesting as in rails
+    def __appender(self,dict,arr,val):
+            if len(arr) > 1:
+                try:
+                    dict[arr[0]]
+                except KeyError:
+                    dict[arr[0]]={}
+                return {arr[0]: self.__appender(dict[arr[0]],arr[1:],val)}
+            else:
+                dict[arr[0]]=val
+                return 
+
+    def __nested_params(self,prm):
+        prm2={}
+        for param in prm:
+            parray = param.replace(']',"").split('[')
+            self.__appender(prm2,parray,prm[param])
+        return prm2
+        

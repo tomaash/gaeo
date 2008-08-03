@@ -71,6 +71,13 @@ class BaseModel(db.Model):
         
         if need_change:
             self.update()
+
+    def set_attributes(self, **kwds):
+        """Update the specified properties"""
+        props = self.properties()
+        for prop in props.values():
+            if prop.name in kwds:
+                prop.__set__(self, kwds[prop.name])
         
     def save(self):
         self.put()
