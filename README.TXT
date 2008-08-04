@@ -1,7 +1,7 @@
 google-app-engine-oil (gaeo) - A MVC web framework on Google AppEngine.
 
 Authors: Lin-Chieh Shangkuan (Eric) <ericsk@gaeo.org>,
-         Liang-Heng Chen (Gary) <xeonchen+gaeo@gmail.com>
+         Liang-Heng Chen (Gary) <xeon@gaeo.org>
 
 
 == About

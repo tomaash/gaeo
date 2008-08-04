@@ -64,13 +64,9 @@ class BaseModel(db.Model):
         need_change = False
         
         # if user passed a dict, merge to kwds (Issue #3)
-        if len(kwd_dict) > 0:
-            if len(kwds) == 0:
-                kwds = kwd_dict
-            else:
-                for key in kwd_dict:
-                    if key not in kwds:
-                        kwds[key] = kwd_dict[key]
+        if kwd_dict:
+            kwd_dict.update(kwds)
+            kwds = kwd_dict
         
         props = self.properties()
         for prop in props.values():
@@ -86,13 +82,9 @@ class BaseModel(db.Model):
         """set the specified properties, but not update"""
         
         # Issue #3
-        if len(kwd_dict) > 0:
-            if len(kwds) == 0:
-                kwds = kwd_dict
-            else:
-                for key in kwd_dict:
-                    if key not in kwds:
-                        kwds[key] = kwd_dict[key]
+        if kwd_dict:
+            kwd_dict.update(kwds)
+            kwds = kwd_dict
         
         props = self.properties()
         for prop in props.values():
