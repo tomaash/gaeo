@@ -83,6 +83,20 @@ class BaseController(object):
     def after_action(self):
         pass
 
+    def to_json(self, obj, **kwds):
+        """ Convert a dict to JSON. Inspired from SimpleJSON """
+        from gaeo.controller.jsonencoder import JSONEncoder
+        
+        if not kwds:
+            return JSONEncoder(skipkeys=False, ensure_ascii=True, check_circular=True,
+                allow_nan=True, indent=None, separators=None, encoding='utf-8',
+                default=None).encode(obj)
+        else:
+            return JSONEncoder(
+                skipkeys=False, ensure_ascii=True, check_circular=True,
+                allow_nan=True, indent=None, separators=None,
+                encoding='utf-8', default=None, **kwds).encode(obj)
+
     def render(self, *text, **opt):
         o = self.resp.out
         h = self.resp.headers
