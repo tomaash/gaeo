@@ -114,6 +114,9 @@ class BaseController(object):
             elif opt.get('xml'):
                 h['Content-Type'] = 'text/xml; charset=utf-8'
                 o.write(opt.get('xml'))
+            elif opt.get('html'):
+                h['Content-Type'] = 'text/html; charset=utf-8'
+                o.write(opt.get('html'))
             elif opt.get('template'):
                 context = {}
                 if isinstance(opt.get('values'), dict):
@@ -123,6 +126,14 @@ class BaseController(object):
                                  opt.get('template') + '.html'),
                     context
                 ))
+            elif opt.get('template_string'):
+                context = {}
+                if isinstance(opt.get('values'), dict):
+                    context.update(opt.get('values'))
+                from django.template import Context, Template
+                t = Template(opt.get('template_string'))
+                c = Context(context)
+                return t.render(c)
             else:
                 raise errors.ControllerRenderTypeError('Render type error')
         self.has_rendered = True
