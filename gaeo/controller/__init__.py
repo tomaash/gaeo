@@ -97,26 +97,27 @@ class BaseController(object):
                 allow_nan=True, indent=None, separators=None,
                 encoding='utf-8', default=None, **kwds).encode(obj)
 
-    def render(self, *text, **opt):
+    def render(self, *html, **opt):
         o = self.resp.out
         h = self.resp.headers
 
-        if text:
-            h['Content-Type'] = 'text/plain'
-            for t in text:
-                o.write(str(t))
+        # check the default Content-Type is 'text/html; charset=utf-8'
+        h['Content-Type'] = 'text/html; charset=utf-8'
+        if html:
+            for h in html:
+                o.write(h.decode('utf-8'))
         elif opt:
-            if opt.get('text'):
-                o.write(str(opt.get('text')))
+            if opt.get('html'):
+                o.write(opt.get('html').decode('utf-8'))                
+            elif opt.get('text'):
+                h['Content-Type'] = 'text/plain; charset=utf-8'
+                o.write(str(opt.get('text')).decode('utf-8'))
             elif opt.get('json'):
                 h['Content-Type'] = 'application/json; charset=utf-8'
-                o.write(opt.get('json'))
+                o.write(opt.get('json').decode('utf-8'))
             elif opt.get('xml'):
                 h['Content-Type'] = 'text/xml; charset=utf-8'
-                o.write(opt.get('xml'))
-            elif opt.get('html'):
-                h['Content-Type'] = 'text/html; charset=utf-8'
-                o.write(opt.get('html'))
+                o.write(opt.get('xml').decode('utf-8'))
             elif opt.get('template'):
                 context = {}
                 if isinstance(opt.get('values'), dict):
@@ -131,9 +132,9 @@ class BaseController(object):
                 if isinstance(opt.get('values'), dict):
                     context.update(opt.get('values'))
                 from django.template import Context, Template
-                t = Template(opt.get('template_string'))
+                t = Template(opt.get('template_string').encode('utf-8'))
                 c = Context(context)
-                return t.render(c)
+                o.write(t.render(c))
             else:
                 raise errors.ControllerRenderTypeError('Render type error')
         self.has_rendered = True
