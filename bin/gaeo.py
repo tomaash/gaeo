@@ -179,6 +179,10 @@ def main(argv):
     # create default template
     create_default_template(os.path.join(application_dir, 'templates', 'welcome', 'index.html'))
 
+    # create blank model module
+    model_dir = os.path.join(application_dir, 'model')
+    create_file(os.path.join(model_dir, '__init__.py'), [])
+
     # create app.yaml
     create_app_yaml(os.path.join(project_home, 'app.yaml'), project_name)
 
