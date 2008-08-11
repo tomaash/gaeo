@@ -1,0 +1,8 @@
+    Google App Engine Oil (GAEO)
+    Copyright 2008 Lin-Chieh Shangkuan & Liang-Heng Chen
+
+    JSON Encoder support is provided by the jsonencoder.py package,
+    which is open source software, written by Bob Ippolito, and copyright
+    by Bob Ippolito. The original software is available from
+        http://code.google.com/p/simplejson/
+
