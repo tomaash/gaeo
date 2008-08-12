@@ -34,6 +34,26 @@ class BaseModel(db.Model):
     """BaseModel is the base class of data model."""
 
     @classmethod
+    def has_many(cls, ref_cls):
+        """ Declare a one-to-many relationship """
+        if ref_cls is None:
+            raise Exception('No referenced class')
+            
+        ref_name = cls.__name__.lower()
+        if ref_name not in ref_cls.__dict__:
+            ref_cls.__dict__[ref_name] = db.ReferenceProperty(cls, collection_name=pluralize(ref_cls.__name__.lower()))
+
+    @classmethod
+    def belong_to(cls, ref_cls):
+        """ Declare a many-to-one relationship """
+        if ref_cls is None:
+            raise Exception('No referenced class')
+        
+        ref_name = ref_cls.__name__.lower()
+        if ref_name not in cls.__dict__:
+            cls.__dict__[ref_name] = db.ReferenceProperty(ref_cls, collection_name=pluralize(cls.__name__.lower()))
+
+    @classmethod
     def has_and_belongs_to_many(cls, ref_cls):
         if ref_cls is None:
             raise Exception('No referenced class')
