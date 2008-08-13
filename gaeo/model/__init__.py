@@ -34,24 +34,16 @@ class BaseModel(db.Model):
     """BaseModel is the base class of data model."""
 
     @classmethod
-    def has_many(cls, ref_cls):
-        """ Declare a one-to-many relationship """
-        if ref_cls is None:
-            raise Exception('No referenced class')
-            
-        ref_name = cls.__name__.lower()
-        if ref_name not in ref_cls.__dict__:
-            ref_cls.__dict__[ref_name] = db.ReferenceProperty(cls, collection_name=pluralize(ref_cls.__name__.lower()))
-
-    @classmethod
     def belong_to(cls, ref_cls):
         """ Declare a many-to-one relationship """
         if ref_cls is None:
             raise Exception('No referenced class')
         
         ref_name = ref_cls.__name__.lower()
-        if ref_name not in cls.__dict__:
-            cls.__dict__[ref_name] = db.ReferenceProperty(ref_cls, collection_name=pluralize(cls.__name__.lower()))
+        if ref_name not in cls._properties:
+            attr = db.ReferenceProperty(ref_cls, collection_name=pluralize(cls.__name__.lower()))
+            cls._properties[ref_name] = attr
+            attr.__property_config__(cls, ref_name)
 
     @classmethod
     def has_and_belongs_to_many(cls, ref_cls):
@@ -61,14 +53,18 @@ class BaseModel(db.Model):
         f_name = pluralize(cls.__name__.lower())
         t_name = pluralize(ref_cls.__name__.lower())
         
-        if t_name not in cls.__dict__:
-            cls.__dict__[t_name] = db.ListProperty(db.Key)
-        if f_name not in ref_cls.__dict__:
-            ref_cls.__dict__[f_name] = property(lambda self: cls.gql('WHERE %s = :1' % t_name, self.key()))
+        if t_name not in cls._properties:
+            attr = db.ListProperty(db.Key)
+            cls._properties[t_name] = attr
+            attr.__property_config__(cls, t_name)
+        if f_name not in ref_cls._properties:
+            attr = property(lambda self: cls.gql('WHERE %s = :1' % t_name, self.key()))
+            ref_cls._properties[f_name] = attr
+            attr.__property_config__(ref_cls, f_name)
     
     @classmethod
     def named_scope(cls, name, order_by=None, **conds):
-        if name not in cls.__dict__:
+        if name not in cls._properties:
             cond_str = "WHERE "
             for cond in conds.iterkeys():
                 if len(cond_str) > 6:
@@ -77,7 +73,10 @@ class BaseModel(db.Model):
                 
             if order_by:
                 cond_str += ' ORDER BY %s' % order_by
-            cls.__dict__[name] = property(lambda self: cls.gql(cond_str))
+                
+            attr = property(lambda self: cls.gql(cond_str))
+            cls._properties[name] = attr
+            attr.__property_config__(cls, name)
     
     def update_attributes(self, kwd_dict = {}, **kwds):
         """Update the specified properties"""
