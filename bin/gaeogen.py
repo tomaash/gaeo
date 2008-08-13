@@ -91,6 +91,7 @@ class GenModel(GenBase):
 
     def generate_content(self):
         self.content = [
+            'from google.appengine.ext import db',
             'from gaeo.model import BaseModel',
             '',
             'class %s(BaseModel):' % self.name.capitalize(),
