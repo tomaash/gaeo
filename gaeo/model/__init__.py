@@ -34,7 +34,7 @@ class BaseModel(db.Model):
     """BaseModel is the base class of data model."""
 
     @classmethod
-    def belong_to(cls, ref_cls):
+    def belongs_to(cls, ref_cls):
         """ Declare a many-to-one relationship """
         if ref_cls is None:
             raise Exception('No referenced class')
