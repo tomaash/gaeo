@@ -82,6 +82,11 @@ class BaseController(object):
 
     def after_action(self):
         pass
+        
+    def invalid_action(self):
+        """ If the router went to an invalid action """
+        self.hnd.error(404)
+        self.render(text="Invalid action")
 
     def to_json(self, obj, **kwds):
         """ Convert a dict to JSON. Inspired from SimpleJSON """

@@ -51,9 +51,18 @@ def dispatch(hnd):
             logging.error(e)
             hnd.response.out.write('<h1>404 Not Found</h1>')
         else:
-            ctrl.before_action()
-            getattr(ctrl, route['action'])()
-            ctrl.after_action()
+            try:
+                ctrl.before_action()
+                getattr(ctrl, route['action'])()
+                ctrl.after_action()
 
-            if not ctrl.has_rendered:
-                ctrl.render(template=route['action'], values=ctrl.__dict__)
+                if not ctrl.has_rendered:
+                    ctrl.render(template=route['action'], values=ctrl.__dict__)
+            except AttributeError, e:   # invalid action
+                logging.error('Invalid action `%s` in `%s`' % (route['action'], route['controller']))
+                ctrl.invalid_action()
+                ctrl.has_rendered = True
+            except Exception, e:
+                hnd.error(500)
+                logging.error(e)
+                hnd.response.out.write('<h1>500 Internal Server Error</h1>')
