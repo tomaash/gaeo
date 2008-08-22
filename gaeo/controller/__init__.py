@@ -60,6 +60,9 @@ class BaseController(object):
         self._is_mobile = self.__detect_mobile()
         self._is_iphone = self.__detect_iphone()
 
+        # alias the cookies
+        self.cookies = self.request.cookies
+
         # create the session
         try:
             store = self.__config.session_store

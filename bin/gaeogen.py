@@ -66,8 +66,6 @@ class GenController(GenBase):
         self.content = [
             'from gaeo.controller import BaseController',
             '',
-            'import model',
-            '',
             'class %sController(BaseController):' % self.name.capitalize(),
         ]
 
