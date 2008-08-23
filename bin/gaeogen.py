@@ -211,8 +211,11 @@ def main(argv):
         return False
     return True
 
-if __name__ == '__main__':
+def commandline():
     if len(sys.argv) < 3 or '--help' in sys.argv or 'help' in sys.argv or not main(sys.argv):
         print usage()
         sys.exit(1)
 
+
+if __name__ == '__main__':
+    commandline()
