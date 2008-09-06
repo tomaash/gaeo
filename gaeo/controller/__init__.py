@@ -127,7 +127,7 @@ class BaseController(object):
                 h['Content-Type'] = 'text/xml; charset=utf-8'
                 o.write(opt.get('xml').decode('utf-8'))
             elif opt.get('template'):
-                context = {}
+                context = self.__dict__
                 if isinstance(opt.get('values'), dict):
                     context.update(opt.get('values'))
                 o.write(template.render(
@@ -136,13 +136,18 @@ class BaseController(object):
                     context
                 ))
             elif opt.get('template_string'):
-                context = {}
+                context = self.__dict__
                 if isinstance(opt.get('values'), dict):
                     context.update(opt.get('values'))
                 from django.template import Context, Template
                 t = Template(opt.get('template_string').encode('utf-8'))
                 c = Context(context)
                 o.write(t.render(c))
+            elif opt.get('image'): # for sending an image content
+                import imghdr
+                img_type = imghdr.what('ignored_filename', opt.get('image'))
+                h['Content-Type'] = 'image/' + img_type
+                o.write(opt.get('image'))
             else:
                 raise errors.ControllerRenderTypeError('Render type error')
         self.has_rendered = True
@@ -202,6 +207,8 @@ class BaseController(object):
         prm2={}
         for param in prm:
             parray = param.replace(']',"").split('[')
+            if len(parray) == 1:
+                parray = parray[0].split('-')
             self.__appender(prm2,parray,prm[param])
         return prm2
         
