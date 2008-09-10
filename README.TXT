@@ -31,8 +31,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
    it will create a foo/ directory and a project with the same name.
 
-3. For more tutorial, please view our QuickStart guide:
-   http://sites.google.com/a/gaeo.org/tutorial/
+3. For more tutorial, please view our documentation site:
+   http://doc.gaeo.org/
 
 == More Information
 
