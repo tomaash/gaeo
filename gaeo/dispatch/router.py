@@ -62,14 +62,15 @@ class Rule(object):
         except IndexError:
             return None
 
+        param = copy(self.param)
         if isinstance(mat, basestring):
             if self.matches:
-                self.param[self.matches[0]] = mat
+                param[self.matches[0]] = mat
         elif isinstance(mat, tuple):
             for i in range(len(mat)):
-                self.param[self.matches[i]] = mat[i]
+                param[self.matches[i]] = mat[i]
 
-        return self.param
+        return param
 
     def url_for(self, controller, **param):
         param['controller'] = controller
