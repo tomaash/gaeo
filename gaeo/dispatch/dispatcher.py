@@ -20,11 +20,25 @@ import logging
 
 import router
 
+HTTP_ERRORS = {
+    '400': 'Bad Request',
+    '402': 'Payment Required',
+    '403': 'Forbidden',
+    '404': 'Not Found',
+    '500': 'Internal Server Error'
+}
+
 def dispatch(hnd):
     # resolve the URL
     url = hnd.request.path
     r = router.Router()
     route = r.resolve(url)
+    
+    def show_error(code, log_msg = ''):
+        hnd.error(code)
+        logging.error(msg)
+        hnd.response.out.write('<h1>%s</h1>' % HTTP_ERRORS[str(code)])
+    
     if route is None:
         raise Exception('invalid URL')
     else:
@@ -42,14 +56,9 @@ def dispatch(hnd):
                          route['controller'].capitalize(),
                          route['action'])
         except ImportError, e:
-            hnd.error(404)
-            # FIXME: What msg is suitable for response ?
-            logging.error(e)
-            hnd.response.out.write('<h1>404 Not Found</h1>')
+            show_error(404, e)
         except AttributeError, e:  # the controller has not been defined.
-            hnd.error(404)
-            logging.error(e)
-            hnd.response.out.write('<h1>404 Not Found</h1>')
+            show_error(404, e)
         else:
             try:
                 action = getattr(ctrl, route['action'], None)
@@ -65,8 +74,6 @@ def dispatch(hnd):
                     ctrl.invalid_action()
                     ctrl.has_rendered = True
             except Exception, e:
-                hnd.error(500)
-                logging.error(e)
                 import traceback,sys
                 traceback.print_exc(file=sys.stderr)
-                hnd.response.out.write('<h1>500 Internal Server Error</h1>')
+                show_error(500, e)
