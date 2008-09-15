@@ -83,8 +83,12 @@ class BaseController(object):
     def before_action(self):
         pass
 
+    def implicit_action(self):
+        pass 
+    
     def after_action(self):
         pass
+        
         
     def invalid_action(self):
         """ If the router went to an invalid action """
