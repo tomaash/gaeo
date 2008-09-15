@@ -36,7 +36,7 @@ def dispatch(hnd):
     
     def show_error(code, log_msg = ''):
         hnd.error(code)
-        logging.error(msg)
+        logging.error(log_msg)
         hnd.response.out.write('<h1>%s</h1>' % HTTP_ERRORS[str(code)])
     
     if route is None:
@@ -44,7 +44,7 @@ def dispatch(hnd):
     else:
         # create the appropriate controller
         try:
-            exec('from controller import %s' % route['controller'])
+            exec('from controller import %s' % route['controller']) in globals()
             ctrl = eval('%s.%sController' % (
                         route['controller'],
                         route['controller'].capitalize()
@@ -63,6 +63,7 @@ def dispatch(hnd):
             try:
                 action = getattr(ctrl, route['action'], None)
                 if action is not None:
+                    ctrl.implicit_action()
                     ctrl.before_action()
                     action()
                     ctrl.after_action()
