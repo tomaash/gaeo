@@ -17,8 +17,10 @@
 """GAEO model package
 """
 import re
-
 from google.appengine.ext import db
+
+#connection to lib.rest
+import lib.rest.appengine
 
 def pluralize(noun):
     if re.search('[sxz]$', noun):
@@ -30,7 +32,8 @@ def pluralize(noun):
     else:
         return noun + 's'
 
-class BaseModel(db.Model):
+#connection to lib.rest
+class BaseModel(lib.rest.appengine.ResourceModel):
     """BaseModel is the base class of data model."""
 
     @classmethod
