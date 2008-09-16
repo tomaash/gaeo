@@ -30,6 +30,9 @@ HTTP_ERRORS = {
     '500': 'Internal Server Error'
 }
 
+TXMT_LINKS = False
+DEBUG = True
+
 def dispatch(hnd):
     # resolve the URL
     url = hnd.request.path
@@ -48,7 +51,10 @@ def dispatch(hnd):
                 mn="in %s" % modulename[0] if modulename else ""
                 fnshort=os.path.basename(fn)
                 ln=linenumber[0]
-                html="<a href='txmt://open/?url=file://%s&line=%s'>%s:%s %s</a> %s" % (fn,ln,fnshort,ln,mn,line)
+                if TXMT_LINKS:
+                    html="<a href='txmt://open/?url=file://%s&line=%s'>%s:%s %s</a> %s" % (fn,ln,fnshort,ln,mn,line)
+                else:
+                    html="<b>%s:%s %s</b> %s" % (fnshort,ln,mn,line)
                 tb+=html
             else:
                 tb+=line
@@ -66,13 +72,14 @@ def dispatch(hnd):
             logging.error(exception_details)
             logging.error(log_msg)
             logging.error(exception_traceback)
-            tb=nice_traceback(exception_traceback)
-            if special_info: logging.error(log_msg)
             hnd.response.out.write('<h1>%s</h1>' % HTTP_ERRORS[str(code)])
-            hnd.response.out.write('<h3>%s: %s</h3>' % (exception_name, exception_details))
-            if special_info: hnd.response.out.write('<pre> %s </pre>' % log_msg)
-            hnd.response.out.write('<h1> Traceback </h1>')
-            hnd.response.out.write('<pre> %s </pre>' % tb)
+            if DEBUG:
+                tb=nice_traceback(exception_traceback)
+                if special_info: logging.error(log_msg)
+                hnd.response.out.write('<h3>%s: %s</h3>' % (exception_name, exception_details))
+                if special_info: hnd.response.out.write('<pre> %s </pre>' % log_msg)
+                hnd.response.out.write('<h1> Traceback </h1>')
+                hnd.response.out.write('<pre> %s </pre>' % tb)
         else:
             hnd.response.out.write('<h1> %s </h1>' % log_msg)
 
