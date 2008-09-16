@@ -68,7 +68,7 @@ class BaseController(object):
             store = self.__config.session_store
             exec('from gaeo.session.%s import %sSession' %
                 (store, store.capitalize()))
-
+        
             self.session = eval('%sSession' % store.capitalize())(
                                 hnd, '%s_session' % self.__config.app_name)
         except:
@@ -80,15 +80,16 @@ class BaseController(object):
             if not re.match('^__.*__$', h):
                 self.__dict__[h] = new.instancemethod(eval('helper.%s' % h), self, BaseController)
 
-    def before_action(self):
-        pass
 
+    #this can be used in application controller, it is meant to be called before every controller
     def implicit_action(self):
         pass 
+
+    def before_action(self):
+        pass
     
     def after_action(self):
         pass
-        
         
     def invalid_action(self):
         """ If the router went to an invalid action """

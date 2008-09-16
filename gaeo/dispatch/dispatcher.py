@@ -20,6 +20,7 @@ import logging
 
 import router
 import sys 
+import os
 from traceback import *
 
 HTTP_ERRORS = {
@@ -30,17 +31,13 @@ HTTP_ERRORS = {
     '500': 'Internal Server Error'
 }
 
-TXMT_LINKS = False
-DEBUG = True
+TXMT_LINKS = False # set true to show textmate links on tracebacks
+DEBUG = True # set true to show traceback on error pages
 
 def dispatch(hnd):
-    # resolve the URL
-    url = hnd.request.path
-    r = router.Router()
-    route = r.resolve(url)
     
+    # generate nice traceback with optional textmate links
     def nice_traceback(traceback):
-        import sys,re,os
         tb=""
         for line in traceback.splitlines(1):
             filename = re.findall('File "(.+)",', line)
@@ -60,9 +57,9 @@ def dispatch(hnd):
                 tb+=line
         return tb
     
+    # show error and write to log
     def show_error(code, log_msg = ''):
         hnd.error(code)
-        import sys,re,os
         if sys.exc_info()[0]:
             exception_name = sys.exc_info()[0].__name__
             exception_details = str(sys.exc_info()[1])
@@ -83,8 +80,16 @@ def dispatch(hnd):
         else:
             hnd.response.out.write('<h1> %s </h1>' % log_msg)
 
+    # resolve the URL
+    url = hnd.request.path
+    r = router.Router()
+    route = r.resolve(url)
+
     if route is None:
-        raise Exception('invalid URL')
+        try:
+            raise Exception('invalid URL')
+        except Exception, e:
+            show_error(500, e)
     else:
         # create the appropriate controller
         try:
@@ -119,10 +124,9 @@ def dispatch(hnd):
                         ctrl.render(template=route['action'], values=ctrl.__dict__)
                 else: # invalid action
                     logging.error('Invalid action `%s` in `%s`' % (route['action'], route['controller']))
-                    show_error(404, "Invalid action")
-                    # ctrl.invalid_action()
-                    ctrl.has_rendered = True
+                    try:
+                        raise Exception('invalid action')
+                    except Exception, e:
+                        show_error(500, e)
             except Exception, e:
-                # import traceback,sys
-                # traceback.print_exc(file=sys.stderr)
                 show_error(500, e)
