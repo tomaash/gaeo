@@ -38,14 +38,13 @@ def dispatch(hnd):
     url = hnd.request.path
     r = router.Router()
     route = r.resolve(url)
-    
-    
+        
     if route is None:
         raise Exception('invalid URL')
     else:
         # create the appropriate controller
         try:
-            exec('from controller import %s' % route['controller'])
+            exec('from controller import %s' % route['controller']) in globals()
             ctrl = eval('%s.%sController' % (
                         route['controller'],
                         route['controller'].capitalize()
@@ -64,6 +63,7 @@ def dispatch(hnd):
             try:
                 action = getattr(ctrl, route['action'], None)
                 if action is not None:
+                    ctrl.implicit_action()
                     ctrl.before_action()
                     action()
                     ctrl.after_action()
