@@ -77,6 +77,10 @@ class BaseModel(db.Model):
             attr = property(lambda self: cls.gql(cond_str))
             cls._properties[name] = attr
             attr.__property_config__(cls, name)
+
+    @classmethod
+    def find(cls, attribute, value):
+        return cls.gql("WHERE %s = :1" % attribute, value )
     
     def update_attributes(self, kwd_dict = {}, **kwds):
         """Update the specified properties"""

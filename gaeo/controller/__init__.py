@@ -90,6 +90,7 @@ class BaseController(object):
     def after_action(self):
         pass
         
+        
     def invalid_action(self):
         """ If the router went to an invalid action """
         self.hnd.error(404)
