@@ -30,34 +30,33 @@ HTTP_ERRORS = {
     '500': 'Internal Server Error'
 }
 
-def show_error(code, log_msg = ''):
-    hnd.error(code)
-    import sys,re,os
-    if sys.exc_info()[0]:
-        exception_name = sys.exc_info()[0].__name__
-        exception_details = str(sys.exc_info()[1])
-        exception_traceback = ''.join(format_exception(*sys.exc_info()))
-        special_info = str(exception_details) != str(log_msg)
-        logging.error(exception_name)
-        logging.error(exception_details)
-        logging.error(log_msg)
-        logging.error(exception_traceback)
-        tb=nice_traceback(exception_traceback)
-        if special_info: logging.error(log_msg)
-        hnd.response.out.write('<h1>%s</h1>' % HTTP_ERRORS[str(code)])
-        hnd.response.out.write('<h3>%s: %s</h3>' % (exception_name, exception_details))
-        if special_info: hnd.response.out.write('<pre> %s </pre>' % log_msg)
-        hnd.response.out.write('<h1> Traceback </h1>')
-        hnd.response.out.write('<pre> %s </pre>' % tb)
-    else:
-        hnd.response.out.write('<h1> %s </h1>' % log_msg)
-
-
 def dispatch(hnd):
     # resolve the URL
     url = hnd.request.path
     r = router.Router()
     route = r.resolve(url)
+ 
+    def show_error(code, log_msg = ''):
+        hnd.error(code)
+        import sys,re,os
+        if sys.exc_info()[0]:
+            exception_name = sys.exc_info()[0].__name__
+            exception_details = str(sys.exc_info()[1])
+            exception_traceback = ''.join(format_exception(*sys.exc_info()))
+            special_info = str(exception_details) != str(log_msg)
+            logging.error(exception_name)
+            logging.error(exception_details)
+            logging.error(log_msg)
+            logging.error(exception_traceback)
+            tb=nice_traceback(exception_traceback)
+            if special_info: logging.error(log_msg)
+            hnd.response.out.write('<h1>%s</h1>' % HTTP_ERRORS[str(code)])
+            hnd.response.out.write('<h3>%s: %s</h3>' % (exception_name, exception_details))
+            if special_info: hnd.response.out.write('<pre> %s </pre>' % log_msg)
+            hnd.response.out.write('<h1> Traceback </h1>')
+            hnd.response.out.write('<pre> %s </pre>' % tb)
+        else:
+            hnd.response.out.write('<h1> %s </h1>' % log_msg)
 
     def nice_traceback(traceback):
         import sys,re,os
