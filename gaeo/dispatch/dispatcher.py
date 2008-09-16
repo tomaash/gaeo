@@ -35,7 +35,25 @@ def dispatch(hnd):
     url = hnd.request.path
     r = router.Router()
     route = r.resolve(url)
- 
+    
+    def nice_traceback(traceback):
+        import sys,re,os
+        tb=""
+        for line in traceback.splitlines(1):
+            filename = re.findall('File "(.+)",', line)
+            linenumber = re.findall(', line\s(\d+),', line)
+            modulename = re.findall(', in ([A-Za-z]+)', line)
+            if filename and linenumber and not re.match("<(.+)>",filename[0]):
+                fn=filename[0]
+                mn="in %s" % modulename[0] if modulename else ""
+                fnshort=os.path.basename(fn)
+                ln=linenumber[0]
+                html="<a href='txmt://open/?url=file://%s&line=%s'>%s:%s %s</a> %s" % (fn,ln,fnshort,ln,mn,line)
+                tb+=html
+            else:
+                tb+=line
+        return tb
+    
     def show_error(code, log_msg = ''):
         hnd.error(code)
         import sys,re,os
@@ -57,27 +75,6 @@ def dispatch(hnd):
             hnd.response.out.write('<pre> %s </pre>' % tb)
         else:
             hnd.response.out.write('<h1> %s </h1>' % log_msg)
-
-    def nice_traceback(traceback):
-        import sys,re,os
-        tb=""
-        for line in traceback.splitlines(1):
-            filename = re.findall('File "(.+)",', line)
-            linenumber = re.findall(', line\s(\d+),', line)
-            modulename = re.findall(', in ([A-Za-z]+)', line)
-            
-            if filename and linenumber and not re.match("<(.+)>",filename[0]):
-                fn=filename[0]
-                mn="in %s" % modulename[0] if modulename else ""
-                fnshort=os.path.basename(fn)
-                ln=linenumber[0]
-                logging.critical(unicode(fn))
-                html="<a href='txmt://open/?url=file://%s&line=%s'>%s:%s %s</a> %s" % (fn,ln,fnshort,ln,mn,line)
-                tb+=html
-            else:
-                tb+=line
-        return tb
-    
 
     if route is None:
         raise Exception('invalid URL')
