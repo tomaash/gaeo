@@ -80,7 +80,6 @@ class BaseController(object):
             if not re.match('^__.*__$', h):
                 self.__dict__[h] = new.instancemethod(eval('helper.%s' % h), self, BaseController)
 
-
     #this can be used in application controller, it is meant to be called before every controller
     def implicit_action(self):
         pass 
