@@ -28,16 +28,17 @@ HTTP_ERRORS = {
     '500': 'Internal Server Error'
 }
 
+def show_error(code, log_msg = ''):
+    hnd.error(code)
+    logging.error(msg)
+    hnd.response.out.write('<h1>%s</h1>' % HTTP_ERRORS[str(code)])
+
 def dispatch(hnd):
     # resolve the URL
     url = hnd.request.path
     r = router.Router()
     route = r.resolve(url)
     
-    def show_error(code, log_msg = ''):
-        hnd.error(code)
-        logging.error(msg)
-        hnd.response.out.write('<h1>%s</h1>' % HTTP_ERRORS[str(code)])
     
     if route is None:
         raise Exception('invalid URL')
