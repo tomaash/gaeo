@@ -79,7 +79,7 @@ class BaseController:
                 if isinstance(opt.get('values'), dict):
                     context += opt.get('values')
                 o.write(template.render(
-                    os.path.join(self.__tpldir, template + '.html'),
+                    os.path.join(self.__tpldir, opt.get('template') + '.html'),
                     context
                 ))
             else:

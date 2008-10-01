@@ -28,11 +28,7 @@ class Router:
                 'controller': 'welcome',
                 'action': 'index',
             }
-            self.__routing_table = []
-            
-            self.connect('/:controller', {'action': 'index'})
-            self.connect('/:controller/:action')
-            
+            self.__routing_table = []            
             
         def connect(self, pattern, tbl = {}):
             """ Add routing pattern """
@@ -45,11 +41,11 @@ class Router:
             if p[0] != '^': p = '^' + p
             if p[-1] != '$': p += '$'
 
-            self.__routing_table = [{
+            self.__routing_table.append({
                 'pattern': p,
                 'mlist': mat, 
                 'm': copy(tbl),
-            }] + self.__routing_table
+            })
         
         def root(self, map = {}):
             """ Set the root (/) routing... """
@@ -57,6 +53,10 @@ class Router:
             self.__routing_root['action'] = map.get('action', self.__routing_root['action'])
         
         def resolve(self, url):
+            # add default routing
+            self.connect('/:controller/:action')
+            self.connect('/:controller', {'action': 'index'})
+            
             """ Resolve the url to the correct mapping """
             if url == '/':
                 return self.__routing_root
