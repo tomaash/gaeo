@@ -19,9 +19,12 @@
 
 class ControllerError(Exception):
     """ Base error class of controllers' errors """
-    
+
+class ControllerInitError(ControllerError):
+    pass
+
 class ControllerRenderError(ControllerError):
     """ error occured while render """
-    
+
 class ControllerRenderTypeError(ControllerRenderError):
     """ Render an invalid type """
