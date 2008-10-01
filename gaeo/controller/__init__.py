@@ -62,10 +62,10 @@ class BaseController:
         o = self.resp.out
         h = self.resp.headers
         
-        if type(opt).__name__ == 'str':
+        if isinstance(opt, basestring):
             h.set('Content-Type', 'text/plain')
             o.write(opt)
-        elif type(opt).__name__ == 'dict':
+        elif isinstance(opt, dict):
             if opt.get('text'):
                 o.write(opt.get('text'))
             elif opt.get('json'):
@@ -76,7 +76,7 @@ class BaseController:
                 o.write(opt.get('xml'))
             elif opt.get('template'):
                 context = {}
-                if type(opt.get('values')).__name__ == 'dict':
+                if isinstance(opt.get('values'), dict):
                     context += opt.get('values')
                 o.write(template.render(
                     os.path.join(self.__tpldir, template + '.html'),
