@@ -20,39 +20,26 @@ import logging
 
 from application import controller
 
-ROUTES = {
-    '/': ('welcome', 'index'),
-}
-
-def _resolveUrl(url):
-    ret = ROUTES.get(url)
-
-    # use the canonical pattern
-    if ret is None:
-        ret = re.findall('/([^/]+)/([^/]*).*', url)
-        if not ret:
-            mat = re.findall('/(.*)', url)
-            ret = (mat[0], 'index')
-            
-    return ret
+import router
 
 def dispatch(hnd):
     # resolve the URL
     url = hnd.request.path
-    
-    route = _resolveUrl(url)
+    r = router.Router()
+    route = r.resolve(url)
     if route is None:
         logging.error('The request url "%s" is invalid. Redirect it to "/"', url)
-        hnd.redirect('/')
+        #hnd.redirect('/')
+        raise Exception('invalid URL')
     else:
         # create the appropriate controller
         try:
-            ctrl = eval('controller.%sController' % route[0].capitalize())(hnd, route)
+            ctrl = eval('controller.%sController' % route['controller'].capitalize())(hnd, route)
                        
             # dispatch
-            logging.info('URL "%s" is dispatched to: %s -> %s', url, route[0], route[1])
+            logging.info('URL "%s" is dispatched to: %sController#%s', url, route['controller'].capitalize(), route['action'])
             ctrl.beforeAction()
-            getattr(ctrl, route[1], ctrl.index)()
+            getattr(ctrl, route['action'])()
             ctrl.afterAction()
         except AttributeError:  # the controller has not been defined.
             hnd.error(404)                

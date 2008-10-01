@@ -29,11 +29,16 @@ class BaseController:
     """The BaseController is the base class of action controllers.
         Action controller handles the requests from clients.
     """
-    def __init__(self, hnd, route):
+    def __init__(self, hnd, params = {}):
         self.resp = hnd.response
         self.req = hnd.request
-        self.__controller = route[0]
-        self.__action = route[1]
+        self.params = params
+        rp = hnd.request.params.mixed()
+        for k in rp:
+            self.params[k] = rp[k] 
+        
+        self.__controller = params['controller']
+        self.__action = params['action']
         self.__hasRendered = False
         self.__config = gaeo.Config()
         
@@ -41,7 +46,6 @@ class BaseController:
             self.__config.template_dir, 
             self.__controller
         )
-        
         self.__template_values = {}
         
     def beforeAction(self):
