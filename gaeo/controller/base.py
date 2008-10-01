@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright 2008 Lin-Chieh Shangkuan & Liang-Heng Chen
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import os
+
+from google.appengine.ext.webapp import template
+
+import gaeo
+import errors
+
+class BaseController:
+    """The BaseController is the base class of action controllers.
+        Action controller handles the requests from clients.
+    """
+    def __init__(self, hnd, route):
+        self.resp = hnd.response
+        self.req = hnd.request
+        self.__controller = route[0]
+        self.__action = route[1]
+        self.__hasRendered = False
+        self.__config = gaeo.Config()
+        
+        self.__tpldir = os.path.join(
+            self.__config.template_dir, 
+            self.__controller
+        )
+        
+    def beforeAction(self):
+        pass
+    
+    def afterAction(self):
+        if not self.__hasRendered:
+            self.resp.out.write(template.render(
+                os.path.join(self.__tpldir, self.__action + '.html'),
+                {}
+            ))
+            
+    def render(self, opt = {}):
+        o = self.resp.out
+        h = self.resp.headers
+        
+        if type(opt).__name__ == 'str':
+            h.set('Content-Type', 'text/plain')
+            o.write(opt)
+        elif type(opt).__name__ == 'dict':
+            if opt.get('text'):
+                o.write(opt.get('text'))
+            elif opt.get('json'):
+                h.set('Content-Type', 'application/json')
+                o.write(opt.get('json'))
+            elif opt.get('xml'):
+                h.set('Content-Type', 'text/xml; charset=utf-8')
+                o.write(opt.get('xml'))
+            elif opt.get('template'):
+                context = {}
+                if type(opt.get('values')).__name__ == 'dict':
+                    context += opt.get('values')
+                o.write(template.render(
+                    os.path.join(self.__tpldir, template + '.html'),
+                    context
+                ))
+            else:
+                raise errors.ControllerRenderTypeError('Missing rendering type')
+        self.__hasRendered = True

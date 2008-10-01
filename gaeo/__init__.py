@@ -27,21 +27,19 @@ from gaeo.dispatch import dispatcher
 
 class Config:
     """ The singleton of GAEO's configuration """
-
+    
     class __impl:
         def __init__(self):
             self.template_dir = ''
-            self.session_store = 'memcache'
-            self.app_name = ''
-
+            
     __instance = None
-
+    
     def __init__(self):
         if Config.__instance is None:
             Config.__instance = Config.__impl()
-
+            
         self.__dict__['_Config__instance'] = Config.__instance
-
+        
     def __getattr__(self, attr):
         return getattr(self.__instance, attr)
 
@@ -53,12 +51,13 @@ class MainHandler(webapp.RequestHandler):
     """Handles all requests
     """
     def get(self):
-        self.__process_request()
-
+        self.__processRequest()
+    
     def post(self):
-        self.__process_request()
-
-    def __process_request(self):
+        self.__processRequest()
+        
+    def __processRequest(self):
         """dispatch the request"""
         dispatcher.dispatch(self)
-
+        
+                
